@@ -7,7 +7,7 @@ class PlayerKind(StrEnum):
     HUMAN = "Human"
     ENEMY = "Enemy"
 
-class PlayerMovement(StrEnum):
+class PlayerDirection(StrEnum):
     LEFT = "Left"
     RIGHT = "Right"
     UP = "Up"
@@ -16,7 +16,6 @@ class PlayerMovement(StrEnum):
 class PlayerShape(StrEnum):
     SQUARE = "Square"
     CIRCLE = "Circle"
-    TRIANGLE = "Triangle"
 
 class PlayerState(StrEnum):
     ALIVE = "Alive"
