@@ -12,9 +12,10 @@ class Player(sprite.Sprite):
     def colors(self, value: dict):
         self._colors = value
 
-    @property
-    def health(self) -> int:
-        return self._health
+        # Get the colors based on state
+        for state in PlayerState:
+            rgb_codes = str(self.colors[state.value]).split(',')
+            self.colors[state.value] = tuple(int(num) for num in rgb_codes)
 
     @health.setter
     def health(self, value: int):
@@ -49,8 +50,8 @@ class Player(sprite.Sprite):
         return self._size
 
     @size.setter
-    def size(self, value: tuple):
-        self._size = value
+    def size(self, value: str):
+        self._size = tuple(int(num) for num in value.split(','))
 
     @property
     def speed(self) -> int:
@@ -70,3 +71,10 @@ class Player(sprite.Sprite):
         self._shape = None
         self._size = ()
         self._speed = 0
+
+    def load(self, data : dict):
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+

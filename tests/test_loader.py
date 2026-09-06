@@ -10,3 +10,4 @@ def test_loads_human():
 def test_loads_enemies():
     enemies = load_class.loadEnemies()
     assert type(enemies) is list
+
