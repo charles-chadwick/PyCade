@@ -170,3 +170,11 @@ class Human(Player):
             self.move(PlayerDirection.LEFT)
         elif keys[pygame.K_RIGHT]:
             self.move(PlayerDirection.RIGHT)
+
+class Enemy(Player):
+
+    def __init__(self, *groups: Group):
+        super().__init__(PlayerKind.ENEMY, *groups)
+
+    def handleInput(self):
+        self.move(PlayerDirection.RIGHT)
