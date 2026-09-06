@@ -22,7 +22,5 @@ class PlayerState(StrEnum):
     WOUNDED = "Wounded"
     DEAD = "Dead"
 
-class Screen(Enum):
-    BACKGROUND_COLOR = (61,56,70)
-    WIDTH = 1280
-    HEIGHT = 1024
+BACKGROUND_COLOR = (61,56,70)
+SCREEN_SIZE = (1280, 968)

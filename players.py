@@ -1,6 +1,9 @@
+import json
+import sys
 from abc import ABC, abstractmethod
-import pygame.draw
-from pygame import sprite, rect
+
+import pygame
+from pygame import sprite, rect, draw, Surface
 from pygame.sprite import Group
 
 import consts
@@ -13,13 +16,15 @@ class Player(sprite.Sprite, ABC):
         return self._colors
 
     @colors.setter
-    def colors(self, value: dict):
-        self._colors = value
+    def colors(self, value: str):
+        self._colors = {
+            state: tuple(int(num) for num in rgb.split(','))
+            for state, rgb in json.loads(value).items()
+        }
 
-        # Get the colors based on state
-        for state in PlayerState:
-            rgb_codes = str(self.colors[state.value]).split(',')
-            self.colors[state.value] = tuple(int(num) for num in rgb_codes)
+    @property
+    def health(self):
+        return self._health
 
     @health.setter
     def health(self, value: int):
@@ -56,6 +61,7 @@ class Player(sprite.Sprite, ABC):
     @size.setter
     def size(self, value: str):
         self._size = tuple(int(num) for num in value.split(','))
+        self.rect.size = self._size
 
     @property
     def speed(self) -> int:
@@ -73,12 +79,13 @@ class Player(sprite.Sprite, ABC):
     def state(self, value: PlayerState):
         self._state = value
 
-    rect: Rect
+    rect: rect.Rect
 
     def __init__(self, kind: PlayerKind, *groups: Group):
         super().__init__(*groups)
         self._kind = kind
 
+        self.rect = rect.Rect(0, 0, 0, 0)
         self._colors = {}
         self._direction = None
         self._health = 0
@@ -88,8 +95,12 @@ class Player(sprite.Sprite, ABC):
         self._speed = 0
         self._state = PlayerState.ALIVE
 
-    def draw(self, screen):
-
+    def draw(self, screen: Surface):
+        """
+        Draw the player on the screen
+        :param screen:
+        :return:
+        """
         # Get the color
         color = self.colors[self.state]
 
@@ -97,9 +108,9 @@ class Player(sprite.Sprite, ABC):
 
         # Get the shape, fill it
         if self.shape == PlayerShape.SQUARE:
-            pygame.draw.rect(screen, color, self.rect, border_radius=4)
+            draw.rect(screen, color, self.rect, border_radius=4)
         elif self.shape == PlayerShape.CIRCLE:
-            pygame.draw.circle(screen, color, self.rect.center, self.rect.width // 2)
+            draw.circle(screen, color, self.rect.center, self.rect.width // 2)
 
     @abstractmethod
     def handleInput(self):
@@ -137,3 +148,25 @@ class Player(sprite.Sprite, ABC):
 
         self.rect.x = new_x
         self.rect.y = new_y
+
+class Human(Player):
+
+    def __init__(self, *groups: Group):
+        super().__init__(PlayerKind.HUMAN, *groups)
+
+    def handleInput(self):
+
+        # Check for quit and space bar
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:
+            self.move(PlayerDirection.UP)
+        elif keys[pygame.K_DOWN]:
+            self.move(PlayerDirection.DOWN)
+        elif keys[pygame.K_LEFT]:
+            self.move(PlayerDirection.LEFT)
+        elif keys[pygame.K_RIGHT]:
+            self.move(PlayerDirection.RIGHT)
