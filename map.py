@@ -64,3 +64,22 @@ class Map(sprite.Sprite):
                 boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
                 player.rect.clamp_ip(boundary_rect)
                 break
+
+    def automateEnemies(self, surface, enemies):
+
+        # Handle enemy stuff
+        for enemy in enemies:
+            enemy.handleInput()
+            enemy.draw(surface)
+            self.enforceBoundaries(enemy)
+
+            new_direction = enemy.direction
+
+            if enemy.rect.right >= consts.SCREEN_SIZE[0]:
+                enemy.move(consts.PlayerDirection.DOWN, enemy.size[1])
+                new_direction = consts.PlayerDirection.LEFT
+            elif enemy.rect.left <= 0:
+                enemy.move(consts.PlayerDirection.DOWN, enemy.size[1])
+                new_direction = consts.PlayerDirection.RIGHT
+
+            enemy.direction = new_direction

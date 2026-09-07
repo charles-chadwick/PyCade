@@ -23,6 +23,14 @@ class Player(sprite.Sprite, ABC):
         }
 
     @property
+    def direction(self):
+        return self._direction
+
+    @direction.setter
+    def direction(self, value: PlayerDirection):
+        self._direction = value
+
+    @property
     def health(self):
         return self._health
 
@@ -127,12 +135,15 @@ class Player(sprite.Sprite, ABC):
             if hasattr(self, key):
                 setattr(self, key, value)
 
-    def move(self, direction):
+    def move(self, direction : PlayerDirection, y_include: int = 0):
         """
         Move the player
+        :param y_include:
         :param direction:
         :return: None
         """
+
+        self._direction = direction
 
         new_x = self.rect.x
         new_y = self.rect.y
@@ -142,9 +153,9 @@ class Player(sprite.Sprite, ABC):
         elif direction == PlayerDirection.RIGHT:
             new_x = new_x + self.speed
         elif direction == PlayerDirection.UP:
-            new_y = new_y - self.speed
+            new_y = new_y - y_include or self.speed
         elif direction == PlayerDirection.DOWN:
-            new_y = new_y + self.speed
+            new_y = new_y + y_include or self.speed
 
         self.rect.x = new_x
         self.rect.y = new_y
@@ -177,4 +188,4 @@ class Enemy(Player):
         super().__init__(PlayerKind.ENEMY, *groups)
 
     def handleInput(self):
-        self.move(PlayerDirection.RIGHT)
+        self.move(self.direction)

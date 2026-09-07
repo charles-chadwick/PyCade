@@ -46,11 +46,7 @@ while True:
     human.draw(surface)
     game_map.enforceBoundaries(human)
 
-    # Handle enemy stuff
-    for enemy in enemies:
-        enemy.handleInput()
-        enemy.draw(surface)
-        game_map.enforceBoundaries(enemy)
+    game_map.automateEnemies(surface, enemies)
 
     # Update
     pygame.display.flip()
