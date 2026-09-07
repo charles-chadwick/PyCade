@@ -5,6 +5,9 @@ import sqlite3
 from pygments.lexers import spice
 from pygame import sprite, rect
 
+import players
+
+
 class Map(sprite.Sprite):
 
     @property
@@ -49,3 +52,15 @@ class Map(sprite.Sprite):
         self.name = name
         self.level = level
 
+      # [
+      #   {"id": 1, "name": "Boundaries", "kind": "Human", "x": 0, "y": 640, "width": 1280, "height": 256},
+      #   {"id": 3, "name": "Boundaries", "kind": "Enemy", "x": 0, "y": 0, "width": 1280, "height": 960}
+      # ]
+    def enforceBoundaries(self, player: players.Player):
+
+        # Check the boundary for the player type
+        for boundary in self.boundaries:
+            if boundary["kind"] == player.kind:
+                boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
+                player.rect.clamp_ip(boundary_rect)
+                break
