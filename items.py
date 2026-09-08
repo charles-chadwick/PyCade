@@ -40,6 +40,7 @@ class Weapon(sprite.Sprite):
 
     def __init__(self, *groups: Group):
         super().__init__(*groups)
+
         self._damage = None
         self._size = None
         self._speed = None

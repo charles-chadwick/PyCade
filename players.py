@@ -1,9 +1,11 @@
 import json
 import sys
-from abc import ABC, abstractmethod
-
 import pygame
-from pygame import sprite, rect, draw, Surface
+
+import items
+from items import Weapon
+from abc import ABC, abstractmethod
+from pygame import sprite, rect, draw, Surface, time
 from pygame.sprite import Group
 
 import consts
@@ -87,10 +89,19 @@ class Player(sprite.Sprite, ABC):
     def state(self, value: PlayerState):
         self._state = value
 
+    @property
+    def weapons(self) -> list:
+        return self._weapons
+
+    @weapons.setter
+    def weapons(self, value: list):
+        self._weapons = value
+
     rect: rect.Rect
 
     def __init__(self, kind: PlayerKind, *groups: Group):
         super().__init__(*groups)
+
         self._kind = kind
 
         self.rect = rect.Rect(0, 0, 0, 0)
@@ -102,6 +113,9 @@ class Player(sprite.Sprite, ABC):
         self._size = ()
         self._speed = 0
         self._state = PlayerState.ALIVE
+        self._weapons = []
+
+        self._time_since_weapon_last_fired = 0
 
     def draw(self, screen: Surface):
         """
@@ -119,6 +133,34 @@ class Player(sprite.Sprite, ABC):
             draw.rect(screen, color, self.rect, border_radius=4)
         elif self.shape == PlayerShape.CIRCLE:
             draw.circle(screen, color, self.rect.center, self.rect.width // 2)
+
+        # draw any weapons
+        for weapon in self.weapons:
+            current_time = pygame.time.get_ticks()
+            draw.rect(screen, (255, 0, 0), weapon.rect)
+
+            if self.kind == PlayerKind.ENEMY:
+                weapon.rect.y += weapon.speed
+            else:
+                weapon.rect.y -= weapon.speed
+
+    def fire(self):
+
+        # check for existing weapons
+        if len(self.weapons) > 2:
+            return
+
+        # check for time since last weapon was fired
+        current_time = pygame.time.get_ticks()
+        time_since_last_fired = current_time - self._time_since_weapon_last_fired
+        if time_since_last_fired >= 400:
+            self._time_since_weapon_last_fired = current_time
+            new_weapon = items.Weapon()
+            new_weapon.damage = 2
+            new_weapon.rect = pygame.rect.Rect(self.rect.centerx, self.rect.y, 8, 8)
+            new_weapon.size = (8, 8)
+            new_weapon.speed = 16
+            self.weapons.append(new_weapon)
 
     @abstractmethod
     def handleInput(self):
@@ -160,6 +202,11 @@ class Player(sprite.Sprite, ABC):
         self.rect.x = new_x
         self.rect.y = new_y
 
+    def takeDamage(self, damage_points : int):
+        self.health -= damage_points
+        if self.health <= 0:
+            self.state = PlayerState.DEAD
+
 class Human(Player):
 
     def __init__(self, *groups: Group):
@@ -171,6 +218,9 @@ class Human(Player):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.fire()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:

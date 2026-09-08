@@ -1,10 +1,13 @@
 import json
 
+import pygame.sprite
+
 import consts
 import sqlite3
 from pygments.lexers import spice
 from pygame import sprite, rect
 
+import items
 import players
 
 
@@ -44,28 +47,7 @@ class Map(sprite.Sprite):
         self._name = None
         self._level = None
 
-    def load(self, name, level):
-
-        cursor = self._conn.execute("SELECT * FROM maps WHERE game = ? AND level = ?", (name, level,))
-        map_data = dict(cursor.fetchone())
-        self.boundaries = map_data["boundaries"]
-        self.name = name
-        self.level = level
-
-      # [
-      #   {"id": 1, "name": "Boundaries", "kind": "Human", "x": 0, "y": 640, "width": 1280, "height": 256},
-      #   {"id": 3, "name": "Boundaries", "kind": "Enemy", "x": 0, "y": 0, "width": 1280, "height": 960}
-      # ]
-    def enforceBoundaries(self, player: players.Player):
-
-        # Check the boundary for the player type
-        for boundary in self.boundaries:
-            if boundary["kind"] == player.kind:
-                boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
-                player.rect.clamp_ip(boundary_rect)
-                break
-
-    def automateEnemies(self, surface, enemies):
+    def automateEnemies(self, surface : pygame.Surface, enemies):
 
         # Handle enemy stuff
         for enemy in enemies:
@@ -83,3 +65,43 @@ class Map(sprite.Sprite):
                 new_direction = consts.PlayerDirection.RIGHT
 
             enemy.direction = new_direction
+
+    def enforceBoundaries(self, player: players.Player):
+
+        # Check the boundary for the player type
+        for boundary in self.boundaries:
+            if boundary["kind"] == player.kind:
+                boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
+                player.rect.clamp_ip(boundary_rect)
+                break
+
+    def checkForCollisions(self, *human : players.Human, enemies: list):
+
+        whole_board = pygame.rect.Rect(0, 0, consts.SCREEN_SIZE[0], consts.SCREEN_SIZE[1])
+
+        # Cycle through human weapons
+        for weapon in human.weapons:
+
+            for enemy in enemies:
+                if pygame.sprite.collide_rect(weapon.rect, enemy.rect):
+                    # enemy takes damage if the weapon hits
+                    enemy.takeDamage(weapon.damage)
+                    human.weapons.remove(weapon)
+                elif pygame.sprite.collide_rect(enemy.rect, human.rect):
+                    # human takes damage if they collide with the enemy
+                    # @todo: change this so the enemy has damange points
+                    human.takeDamage(1)
+                    human.weapons.remove(weapon)
+
+            # Now if the weapon is off the board, nuke it
+            if not whole_board.colliderect(weapon.rect):
+                human.weapons.remove(weapon)
+
+
+    def load(self, name, level):
+
+        cursor = self._conn.execute("SELECT * FROM maps WHERE game = ? AND level = ?", (name, level,))
+        map_data = dict(cursor.fetchone())
+        self.boundaries = map_data["boundaries"]
+        self.name = name
+        self.level = level
