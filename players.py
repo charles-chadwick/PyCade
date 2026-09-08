@@ -151,6 +151,7 @@ class Player(sprite.Sprite, ABC):
             return
 
         # check for time since last weapon was fired
+        # @todo: fix the weapon class to load the data better
         current_time = pygame.time.get_ticks()
         time_since_last_fired = current_time - self._time_since_weapon_last_fired
         if time_since_last_fired >= 400:
