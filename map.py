@@ -105,7 +105,17 @@ class Map(sprite.Sprite):
             # The weapon is spent on the first enemy it hits
             hit_index = weapon.rect.collidelist(enemy_rects)
             if hit_index != -1:
-                live_enemies[hit_index].takeDamage(weapon.damage)
+                enemy = live_enemies[hit_index]
+                enemy.takeDamage(weapon.damage)
+
+                # Out of health, so take it out of play. Dropping it from the local lists too keeps
+                # the rects in step with live_enemies so later weapons this frame can't hit a corpse
+                if enemy.health <= 0:
+                    enemy.kill()
+                    enemies.remove(enemy)
+                    del live_enemies[hit_index]
+                    del enemy_rects[hit_index]
+
                 weapon.kill()
                 continue
 
