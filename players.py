@@ -116,6 +116,7 @@ class Player(sprite.Sprite, ABC):
         self._weapons = []
 
         self._time_since_weapon_last_fired = 0
+        self._time_since_wounded = 0
 
     def draw(self, screen: Surface):
         """
@@ -126,7 +127,18 @@ class Player(sprite.Sprite, ABC):
         # Get the color
         color = self.colors[self.state]
 
-        # @TODO: Change the color based on if the player is being wounded in the moment
+        """
+        The color will change  based on their state
+        """
+        if self.state == PlayerState.WOUNDED:
+
+            current_time = pygame.time.get_ticks()
+            if current_time - self._time_since_wounded <= 200:
+                # @todo fade colors
+                color = (255, 0, 255)
+            else:
+                self.state = PlayerState.ALIVE
+                self._time_since_wounded = current_time
 
         # Get the shape, fill it
         if self.shape == PlayerShape.SQUARE:
@@ -204,7 +216,11 @@ class Player(sprite.Sprite, ABC):
         self.rect.y = new_y
 
     def takeDamage(self, damage_points : int):
+
+        self.state = PlayerState.WOUNDED
         self.health -= damage_points
+        self._time_since_wounded = pygame.time.get_ticks()
+
         if self.health <= 0:
             self.state = PlayerState.DEAD
 
