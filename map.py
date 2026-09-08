@@ -47,6 +47,9 @@ class Map(sprite.Sprite):
         self._name = None
         self._level = None
 
+        # Built once instead of per frame in checkForCollisions
+        self._whole_board = rect.Rect((0, 0), consts.SCREEN_SIZE)
+
     def automateEnemies(self, surface : pygame.Surface, enemies):
 
         # Handle enemy stuff
@@ -75,27 +78,40 @@ class Map(sprite.Sprite):
                 player.rect.clamp_ip(boundary_rect)
                 break
 
-    def checkForCollisions(self, *human : players.Human, enemies: list):
+    def checkForCollisions(self, human : players.Human, enemies: list):
 
-        whole_board = pygame.rect.Rect(0, 0, consts.SCREEN_SIZE[0], consts.SCREEN_SIZE[1])
+        # Dead enemies can't be hit or do damage. The rects come out once so the checks below run
+        # inside pygame's collidelist instead of a python loop per weapon
+        live_enemies = [enemy for enemy in enemies if enemy.state != consts.PlayerState.DEAD]
+        enemy_rects = [enemy.rect for enemy in live_enemies]
 
-        # Cycle through human weapons
+        # The human takes damage from touching an enemy, whether or not they have weapons in flight
+        # @todo: change this so the enemy has damage points
+        if human.rect.collidelist(enemy_rects) != -1:
+            human.takeDamage(1)
+
+        # Cycle through human weapons, keeping only the ones still in play. Rebuilding the list in a
+        # single pass avoids mutating the list being iterated over (which skips entries) and the
+        # repeated remove() scans
+        surviving_weapons = []
+
         for weapon in human.weapons:
 
-            for enemy in enemies:
-                if pygame.sprite.collide_rect(weapon.rect, enemy.rect):
-                    # enemy takes damage if the weapon hits
-                    enemy.takeDamage(weapon.damage)
-                    human.weapons.remove(weapon)
-                elif pygame.sprite.collide_rect(enemy.rect, human.rect):
-                    # human takes damage if they collide with the enemy
-                    # @todo: change this so the enemy has damange points
-                    human.takeDamage(1)
-                    human.weapons.remove(weapon)
+            # If the weapon is off the board, nuke it
+            if not self._whole_board.colliderect(weapon.rect):
+                weapon.kill()
+                continue
 
-            # Now if the weapon is off the board, nuke it
-            if not whole_board.colliderect(weapon.rect):
-                human.weapons.remove(weapon)
+            # The weapon is spent on the first enemy it hits
+            hit_index = weapon.rect.collidelist(enemy_rects)
+            if hit_index != -1:
+                live_enemies[hit_index].takeDamage(weapon.damage)
+                weapon.kill()
+                continue
+
+            surviving_weapons.append(weapon)
+
+        human.weapons = surviving_weapons
 
 
     def load(self, name, level):

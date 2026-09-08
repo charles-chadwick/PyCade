@@ -44,8 +44,9 @@ while True:
     # Handle player stuff
     human.handleInput()
     human.draw(surface)
-    game_map.enforceBoundaries(human)
 
+    game_map.enforceBoundaries(human)
+    game_map.checkForCollisions(human, enemies=enemies)
     game_map.automateEnemies(surface, enemies)
 
     # Update
