@@ -208,9 +208,12 @@ class Player(sprite.Sprite, ABC):
         elif direction == PlayerDirection.RIGHT:
             new_x = new_x + self.speed
         elif direction == PlayerDirection.UP:
-            new_y = new_y - y_include or self.speed
+            new_y = new_y - self.speed
         elif direction == PlayerDirection.DOWN:
-            new_y = new_y + y_include or self.speed
+            new_y = new_y + self.speed
+
+        if y_include > 0:
+            new_y += y_include
 
         self.rect.x = new_x
         self.rect.y = new_y
@@ -226,8 +229,17 @@ class Player(sprite.Sprite, ABC):
 
 class Human(Player):
 
+    @property
+    def score(self) -> int:
+        return self._score
+
+    @score.setter
+    def score(self, value: int):
+        self._score = value
+
     def __init__(self, *groups: Group):
         super().__init__(PlayerKind.HUMAN, *groups)
+        self._score = 0
 
     def handleInput(self):
 

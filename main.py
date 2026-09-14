@@ -9,6 +9,7 @@ from map import Map
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s: %(message)s')
 
 pygame.init()
+
 pygame.display.set_caption("PyCade")
 surface = pygame.display.set_mode(consts.SCREEN_SIZE)
 clock = pygame.time.Clock()
@@ -48,6 +49,7 @@ while True:
     game_map.enforceBoundaries(human)
     game_map.checkForCollisions(human, enemies=enemies)
     game_map.automateEnemies(surface, enemies)
+    game_map.drawScoreBoard(surface, human)
 
     # Update
     pygame.display.flip()

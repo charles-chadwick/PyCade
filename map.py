@@ -1,15 +1,12 @@
 import json
-
 import pygame.sprite
-
 import consts
 import sqlite3
 from pygments.lexers import spice
 from pygame import sprite, rect
-
-import items
 import players
-
+pygame.font.init()
+my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
 class Map(sprite.Sprite):
 
@@ -69,15 +66,6 @@ class Map(sprite.Sprite):
 
             enemy.direction = new_direction
 
-    def enforceBoundaries(self, player: players.Player):
-
-        # Check the boundary for the player type
-        for boundary in self.boundaries:
-            if boundary["kind"] == player.kind:
-                boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
-                player.rect.clamp_ip(boundary_rect)
-                break
-
     def checkForCollisions(self, human : players.Human, enemies: list):
 
         # Dead enemies can't be hit or do damage. The rects come out once so the checks below run
@@ -107,7 +95,7 @@ class Map(sprite.Sprite):
             if hit_index != -1:
                 enemy = live_enemies[hit_index]
                 enemy.takeDamage(weapon.damage)
-
+                human.score += 1
                 # Out of health, so take it out of play. Dropping it from the local lists too keeps
                 # the rects in step with live_enemies so later weapons this frame can't hit a corpse
                 if enemy.health <= 0:
@@ -123,6 +111,21 @@ class Map(sprite.Sprite):
 
         human.weapons = surviving_weapons
 
+    def drawScoreBoard(self, screen : pygame.Surface, human: players.Human):
+        # This draws the scoreboard on the screen
+        scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height = consts.SCOREBOARD_RECT
+        screen.fill(consts.SCOREBOARD_COLOR, pygame.rect.Rect(scoreboard_x, scoreboard_y, scoreboard_height, scoreboard_width))
+        text_surface = my_font.render(f"Player Score: {human.score}", False, (200, 200, 200))
+        screen.blit(text_surface, (0, 912))
+
+    def enforceBoundaries(self, player: players.Player):
+
+        # Check the boundary for the player type
+        for boundary in self.boundaries:
+            if boundary["kind"] == player.kind:
+                boundary_rect = rect.Rect(boundary["x"], boundary["y"], boundary["width"], boundary["height"])
+                player.rect.clamp_ip(boundary_rect)
+                break
 
     def load(self, name, level):
 
