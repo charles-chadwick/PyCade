@@ -124,12 +124,11 @@ class Player(sprite.Sprite, ABC):
         :param screen:
         :return:
         """
+
         # Get the color
         color = self.colors[self.state]
 
-        """
-        The color will change  based on their state
-        """
+        # The color will change  based on their state
         if self.state == PlayerState.WOUNDED:
 
             current_time = pygame.time.get_ticks()
@@ -146,9 +145,9 @@ class Player(sprite.Sprite, ABC):
         elif self.shape == PlayerShape.CIRCLE:
             draw.circle(screen, color, self.rect.center, self.rect.width // 2)
 
-        # draw any weapons
+        # draw and move any weapons
         for weapon in self.weapons:
-            current_time = pygame.time.get_ticks()
+
             draw.rect(screen, (255, 0, 0), weapon.rect)
 
             if self.kind == PlayerKind.ENEMY:

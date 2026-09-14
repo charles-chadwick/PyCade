@@ -53,10 +53,10 @@ class Map(sprite.Sprite):
         for enemy in enemies:
             enemy.handleInput()
             enemy.draw(surface)
-            self.enforceBoundaries(enemy)
 
             new_direction = enemy.direction
 
+            # This moves them down and in the direction of the opposigte wall
             if enemy.rect.right >= consts.SCREEN_SIZE[0]:
                 enemy.move(consts.PlayerDirection.DOWN, enemy.size[1])
                 new_direction = consts.PlayerDirection.LEFT
