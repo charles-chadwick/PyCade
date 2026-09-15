@@ -97,7 +97,7 @@ class Map(sprite.Sprite):
                 enemy.takeDamage(weapon.damage)
                 human.score += 1
                 # Out of health, so take it out of play. Dropping it from the local lists too keeps
-                # the rects in step with live_enemies so later weapons this frame can't hit a corpse
+                # the rects in a step with live_enemies so later weapons this frame can't hit a corpse
                 if enemy.health <= 0:
                     enemy.kill()
                     enemies.remove(enemy)
@@ -114,7 +114,7 @@ class Map(sprite.Sprite):
     def drawScoreBoard(self, screen : pygame.Surface, human: players.Human):
         # This draws the scoreboard on the screen
         scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height = consts.SCOREBOARD_RECT
-        screen.fill(consts.SCOREBOARD_COLOR, pygame.rect.Rect(scoreboard_x, scoreboard_y, scoreboard_height, scoreboard_width))
+        screen.fill(consts.SCOREBOARD_COLOR, pygame.rect.Rect(scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height))
         text_surface = my_font.render(f"Player Score: {human.score}", False, (200, 200, 200))
         screen.blit(text_surface, (0, 912))
 
