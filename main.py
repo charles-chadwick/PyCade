@@ -1,21 +1,21 @@
 import sys
 
 import pygame
-import consts
+import constants
 import loader
 import players
 import logging
-from map import Map
+from board import Board
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s: %(message)s')
 
 pygame.init()
 
 pygame.display.set_caption("PyCade")
-surface = pygame.display.set_mode(consts.SCREEN_SIZE)
+surface = pygame.display.set_mode(constants.SCREEN_SIZE)
 clock = pygame.time.Clock()
 
 # Load the game and map
-game_map = Map()
+game_map = Board()
 game_map.load("Space Invaders", 1)
 
 # Load the players
@@ -34,13 +34,13 @@ for enemy_data in loader_class.loadEnemies():
             enemy = players.Enemy()
             enemy.load(enemy_data)
             enemy.rect.x += (enemy.rect.width * 2) * i
-            enemy.move(consts.PlayerDirection.RIGHT)
+            enemy.move(constants.PlayerDirection.RIGHT)
             enemies.append(enemy)
 
 while True:
 
     # Fill the surface
-    surface.fill(consts.BACKGROUND_COLOR)
+    surface.fill(constants.BACKGROUND_COLOR)
 
     # Handle player stuff
     human.handleInput()

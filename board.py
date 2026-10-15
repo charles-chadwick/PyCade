@@ -1,6 +1,6 @@
 import json
 import pygame.sprite
-import consts
+import constants
 import sqlite3
 from pygments.lexers import spice
 from pygame import sprite, rect
@@ -8,7 +8,7 @@ import players
 pygame.font.init()
 my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
-class Map(sprite.Sprite):
+class Board(sprite.Sprite):
 
     @property
     def boundaries(self) -> list:
@@ -37,7 +37,7 @@ class Map(sprite.Sprite):
     def __init__(self, *groups: sprite.Group):
         super().__init__(*groups)
 
-        self._conn = sqlite3.connect(consts.Paths.DATABASE)
+        self._conn = sqlite3.connect(constants.Paths.DATABASE)
         self._conn.row_factory = sqlite3.Row
 
         self._boundaries = []
@@ -45,7 +45,7 @@ class Map(sprite.Sprite):
         self._level = None
 
         # Built once instead of per frame in checkForCollisions
-        self._whole_board = rect.Rect((0, 0), consts.SCREEN_SIZE)
+        self._whole_board = rect.Rect((0, 0), constants.SCREEN_SIZE)
 
     def automateEnemies(self, surface : pygame.Surface, enemies):
 
@@ -57,12 +57,12 @@ class Map(sprite.Sprite):
             new_direction = enemy.direction
 
             # This moves them down and in the direction of the opposigte wall
-            if enemy.rect.right >= consts.SCREEN_SIZE[0]:
-                enemy.move(consts.PlayerDirection.DOWN, enemy.size[1])
-                new_direction = consts.PlayerDirection.LEFT
+            if enemy.rect.right >= constants.SCREEN_SIZE[0]:
+                enemy.move(constants.PlayerDirection.DOWN, enemy.size[1])
+                new_direction = constants.PlayerDirection.LEFT
             elif enemy.rect.left <= 0:
-                enemy.move(consts.PlayerDirection.DOWN, enemy.size[1])
-                new_direction = consts.PlayerDirection.RIGHT
+                enemy.move(constants.PlayerDirection.DOWN, enemy.size[1])
+                new_direction = constants.PlayerDirection.RIGHT
 
             enemy.direction = new_direction
 
@@ -70,7 +70,7 @@ class Map(sprite.Sprite):
 
         # Dead enemies can't be hit or do damage. The rects come out once so the checks below run
         # inside pygame's collidelist instead of a python loop per weapon
-        live_enemies = [enemy for enemy in enemies if enemy.state != consts.PlayerState.DEAD]
+        live_enemies = [enemy for enemy in enemies if enemy.state != constants.PlayerState.DEAD]
         enemy_rects = [enemy.rect for enemy in live_enemies]
 
         # The human takes damage from touching an enemy, whether or not they have weapons in flight
@@ -95,7 +95,7 @@ class Map(sprite.Sprite):
             if hit_index != -1:
                 enemy = live_enemies[hit_index]
                 enemy.takeDamage(weapon.damage)
-                human.score += 1
+                human.score += len(enemies) - len(live_enemies)
                 # Out of health, so take it out of play. Dropping it from the local lists too keeps
                 # the rects in a step with live_enemies so later weapons this frame can't hit a corpse
                 if enemy.health <= 0:
@@ -113,8 +113,8 @@ class Map(sprite.Sprite):
 
     def drawScoreBoard(self, screen : pygame.Surface, human: players.Human):
         # This draws the scoreboard on the screen
-        scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height = consts.SCOREBOARD_RECT
-        screen.fill(consts.SCOREBOARD_COLOR, pygame.rect.Rect(scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height))
+        scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height = constants.SCOREBOARD_RECT
+        screen.fill(constants.SCOREBOARD_COLOR, pygame.rect.Rect(scoreboard_x, scoreboard_y, scoreboard_width, scoreboard_height))
         text_surface = my_font.render(f"Player Score: {human.score}", False, (200, 200, 200))
         screen.blit(text_surface, (0, 912))
 

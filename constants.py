@@ -1,26 +1,26 @@
-from enum import StrEnum, Enum
+from enum import StrEnum
 
 class Paths(StrEnum):
     DATABASE = "res/pygame.sqlite3"
 
 class PlayerKind(StrEnum):
-    HUMAN = "Human"
     ENEMY = "Enemy"
+    HUMAN = "Human"
 
 class PlayerDirection(StrEnum):
+    DOWN = "Down"
     LEFT = "Left"
     RIGHT = "Right"
     UP = "Up"
-    DOWN = "Down"
 
 class PlayerShape(StrEnum):
-    SQUARE = "Square"
     CIRCLE = "Circle"
+    SQUARE = "Square"
 
 class PlayerState(StrEnum):
     ALIVE = "Alive"
-    WOUNDED = "Wounded"
     DEAD = "Dead"
+    WOUNDED = "Wounded"
 
 BACKGROUND_COLOR = (50, 50, 50)
 SCOREBOARD_COLOR = (65,65,65)

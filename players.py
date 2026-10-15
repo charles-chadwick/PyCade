@@ -8,8 +8,8 @@ from abc import ABC, abstractmethod
 from pygame import sprite, rect, draw, Surface, time
 from pygame.sprite import Group
 
-import consts
-from consts import PlayerKind, PlayerDirection, PlayerState, PlayerShape
+import constants
+from constants import PlayerKind, PlayerDirection, PlayerState, PlayerShape
 
 class Player(sprite.Sprite, ABC):
 
